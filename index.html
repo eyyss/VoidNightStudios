@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Void Night Studios | Unity Editor Portfolyo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --u-bg: #1c1c1c; --u-panel: #2a2a2a; --u-header: #383838;
+            --u-accent: #81b4ff; --u-border: #121212; --u-text: #d2d2d2;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--u-bg); color: var(--u-text); font-family: 'Inter', sans-serif; overflow: hidden; font-size: 13px; }
+        
+        /* Unity Top Bar */
+        nav { background: var(--u-header); height: 30px; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid var(--u-border); gap: 15px; }
+        .nav-item { cursor: pointer; opacity: 0.7; font-size: 12px; }
+
+        /* Main Editor Layout */
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr 300px;
+            grid-template-rows: 1fr 250px;
+            height: calc(100vh - 65px);
+        }
+
+        /* Hierarchy (Sol Üst) */
+        .hierarchy { grid-area: 1 / 1 / 2 / 2; background: var(--u-panel); border-right: 1px solid var(--u-border); padding: 10px; }
+        
+        /* Scene View (Orta Üst) */
+        .scene-view { 
+            grid-area: 1 / 2 / 2 / 3; background: #333; position: relative;
+            background-image: radial-gradient(#444 1px, transparent 1px); background-size: 25px 25px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .scene-tab { position: absolute; top: 0; left: 0; background: #333; padding: 5px 15px; font-size: 11px; border-right: 1px solid #222; }
+
+        /* Project Window (Alt Paneller) */
+        .project-window { 
+            grid-area: 2 / 1 / 3 / 3; background: var(--u-panel); border-top: 2px solid var(--u-border); 
+            display: grid; grid-template-columns: 200px 1fr;
+        }
+        .folder-tree { border-right: 1px solid var(--u-border); padding: 10px 0; }
+        .content-grid { 
+            padding: 15px; display: none; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; overflow-y: auto; 
+        }
+        .content-grid.active { display: grid; }
+
+        /* Inspector (Sağ Panel) */
+        .inspector { grid-area: 1 / 3 / 3 / 4; background: var(--u-panel); border-left: 2px solid var(--u-border); padding: 15px; }
+        .ins-title { font-weight: bold; border-bottom: 1px solid var(--u-border); padding-bottom: 5px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+
+        /* Asset Cards */
+        .asset-card { 
+            text-align: center; cursor: pointer; padding: 8px; border-radius: 4px; transition: 0.2s;
+            text-decoration: none; color: inherit;
+        }
+        .asset-card:hover { background: #3e3e3e; }
+        .asset-icon { width: 64px; height: 64px; background: #383838; margin: 0 auto 5px; border: 1px solid #444; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+
+        /* Typography & Components */
+        .comp-box { background: #333; padding: 10px; margin-bottom: 10px; border-radius: 3px; border-left: 3px solid var(--u-accent); }
+        .prop-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+        .prop-label { color: #888; }
+        
+        .folder-item { padding: 4px 20px; cursor: pointer; opacity: 0.8; }
+        .folder-item:hover, .folder-item.active { background: #3e5f8a; opacity: 1; }
+
+        footer { height: 35px; background: var(--u-panel); border-top: 1px solid var(--u-border); display: flex; align-items: center; padding: 0 15px; font-size: 11px; color: #aaa; position: fixed; bottom: 0; width: 100%; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div style="font-weight: bold; color: #fff;">VOID NIGHT STUDIOS</div>
+    <div class="nav-item">File</div><div class="nav-item">Edit</div><div class="nav-item">Assets</div><div class="nav-item">Window</div>
+</nav>
+
+<div class="editor-grid">
+    <aside class="hierarchy">
+        <div style="font-size: 11px; color: #666; margin-bottom: 8px;">Hierarchy</div>
+        <div>▼ MainScene</div>
+        <div style="margin-left: 15px; color: var(--u-accent);">● Global_Light</div>
+        <div style="margin-left: 15px;">● Studio_Manager</div>
+        <div style="margin-left: 15px;">● UI_Canvas</div>
+    </aside>
+
+    <section class="scene-view">
+        <div class="scene-tab"># Scene</div>
+        <h1 style="margin:0; letter-spacing: 4px;">VOID NIGHT</h1>
+        <p style="font-family: 'JetBrains Mono'; color: #888;">Indie game studio from Turkey.</p>
+    </section>
+
+    <section class="project-window">
+        <div class="folder-tree">
+            <div style="font-size: 11px; color: #666; padding: 0 20px 5px;">Project</div>
+            <div class="folder-item active" onclick="tabs('games', this)">📂 Games</div>
+            <div class="folder-item" onclick="tabs('assets', this)">📂 Unity Assets</div>
+        </div>
+
+        <div id="games" class="content-grid active">
+            <a href="https://store.steampowered.com/app/3337050/The_Night_Games_Collection/" target="_blank" class="asset-card" 
+               onmouseover="inspect('The Night Games Coll.', 'Steam / Collection', 'Atmospheric horror mini-games.', '🌕')">
+                <div class="asset-icon">🌑</div><span>Night Games</span>
+            </a>
+            <a href="https://store.steampowered.com/app/4298170/Carry_the_Pack_Rack/" target="_blank" class="asset-card" 
+               onmouseover="inspect('Carry the Pack Rack', 'Steam / Indie', 'A unique management & carry experience.', '🎒')">
+                <div class="asset-icon">🎒</div><span>Pack Rack</span>
+            </a>
+            <a href="https://beratozturkoglu.itch.io/night-bici" target="_blank" class="asset-card" 
+               onmouseover="inspect('Night Bici', 'Itch.io / Casual', 'Traditional street food sim.', '🍧')">
+                <div class="asset-icon">🍧</div><span>Bici</span>
+            </a>
+            <a href="https://beratozturkoglu.itch.io/night-kebap" target="_blank" class="asset-card" 
+               onmouseover="inspect('Night Kebap', 'Itch.io / Simulation', 'The ultimate kebap master experience.', '🍢')">
+                <div class="asset-icon">🍢</div><span>Kebap</span>
+            </a>
+            <a href="https://beratozturkoglu.itch.io/night-reception" target="_blank" class="asset-card" 
+               onmouseover="inspect('Night Reception', 'Itch.io / Horror', 'Something is wrong at the desk...', '🛎️')">
+                <div class="asset-icon">🛎️</div><span>Reception</span>
+            </a>
+            <a href="https://beratozturkoglu.itch.io/night-doner" target="_blank" class="asset-card" 
+               onmouseover="inspect('Night Doner', 'Itch.io / Sim', 'Serving late night döner.', '🥙')">
+                <div class="asset-icon">🥙</div><span>Doner</span>
+            </a>
+        </div>
+
+        <div id="assets" class="content-grid">
+            <a href="https://assetstore.unity.com/packages/tools/physics/easy-peasy-first-person-controller-317073" target="_blank" class="asset-card" 
+               onmouseover="inspect('Easy FP Controller', 'Unity Tool', 'Ready-to-use physics based controller.', '🏃')">
+                <div class="asset-icon">🏃</div><span>FP Controller</span>
+            </a>
+            <a href="https://assetstore.unity.com/packages/templates/systems/easy-horror-template-306111" target="_blank" class="asset-card" 
+               onmouseover="inspect('Easy Horror Template', 'Unity Template', 'All-in-one horror game framework.', '👻')">
+                <div class="asset-icon">👻</div><span>Horror Temp.</span>
+            </a>
+            <a href="https://assetstore.unity.com/packages/tools/audio/easy-audio-cutter-316085" target="_blank" class="asset-card" 
+               onmouseover="inspect('Easy Audio Cutter', 'Unity Tool', 'Cut and edit audio inside Unity.', '✂️')">
+                <div class="asset-icon">✂️</div><span>Audio Cutter</span>
+            </a>
+            <a href="https://assetstore.unity.com/packages/tools/particles-effects/feedback-graph-352056" target="_blank" class="asset-card" 
+               onmouseover="inspect('Feedback Graph', 'Unity Tool', 'Visualize game feedback systems.', '📊')">
+                <div class="asset-icon">📊</div><span>Feedback</span>
+            </a>
+        </div>
+    </section>
+
+    <aside class="inspector" id="inspector-panel">
+        <div class="ins-title">ℹ️ Inspector</div>
+        <div id="ins-default">
+            <div class="comp-box">
+                <strong>Studio_Manager (Script)</strong><br>
+                <span style="font-size:11px; color:#888;">Select an item to view properties.</span>
+            </div>
+            <div class="prop-row"><span class="prop-label">Status</span><span>Active</span></div>
+            <div class="prop-row"><span class="prop-label">Origin</span><span>Turkey</span></div>
+        </div>
+        <div id="ins-content" style="display:none;">
+            <div id="ins-icon" style="font-size: 50px; text-align: center; margin-bottom: 10px;"></div>
+            <div class="comp-box">
+                <strong id="ins-name">Item Name</strong><br>
+                <span id="ins-type" style="font-size:11px; color:var(--u-accent);">Type</span>
+            </div>
+            <div class="comp-box">
+                <strong>Description</strong><br>
+                <span id="ins-desc" style="font-size:11px; color:#aaa;">Description goes here...</span>
+            </div>
+            <button style="width:100%; padding:8px; background:#444; border:1px solid #555; color:white; cursor:pointer;" onclick="alert('Redirecting to Store...')">Open Store Page</button>
+        </div>
+    </aside>
+</div>
+
+<footer>
+    <span>[Console] Build Successful: Void Night Studios initialized.</span>
+</footer>
+
+<script>
+    function tabs(id, el) {
+        document.querySelectorAll('.content-grid').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.folder-item').forEach(f => f.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+    }
+
+    function inspect(name, type, desc, icon) {
+        document.getElementById('ins-default').style.display = 'none';
+        document.getElementById('ins-content').style.display = 'block';
+        document.getElementById('ins-name').innerText = name;
+        document.getElementById('ins-type').innerText = type;
+        document.getElementById('ins-desc').innerText = desc;
+        document.getElementById('ins-icon').innerText = icon;
+    }
+</script>
+
+</body>
+</html>
