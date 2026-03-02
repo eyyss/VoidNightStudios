@@ -1,197 +1,618 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Void Night Studios | Unity Editor Portfolyo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <title>Void Night Studios | Unity Editor OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --u-bg: #1c1c1c; --u-panel: #2a2a2a; --u-header: #383838;
-            --u-accent: #81b4ff; --u-border: #121212; --u-text: #d2d2d2;
+            --u-bg: #191919;
+            --u-panel: #2a2a2a;
+            --u-header: #3c3c3c;
+            --u-accent: #4c7ebc;
+            --u-hover: #3e3e3e;
+            --u-border: #121212;
+            --u-text: #c8c8c8;
+            --u-text-dim: #888;
         }
 
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--u-bg); color: var(--u-text); font-family: 'Inter', sans-serif; overflow: hidden; font-size: 13px; }
-        
-        /* Unity Top Bar */
-        nav { background: var(--u-header); height: 30px; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid var(--u-border); gap: 15px; }
-        .nav-item { cursor: pointer; opacity: 0.7; font-size: 12px; }
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
 
-        /* Main Editor Layout */
-        .editor-grid {
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--u-bg);
+            color: var(--u-text);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--u-header);
+            height: 32px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 12px;
+            border-bottom: 1px solid var(--u-border);
+            z-index: 10;
+        }
+
+        .nav-link {
+            margin-right: 15px;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .nav-link:hover {
+            opacity: 1;
+        }
+
+        .editor-container {
             display: grid;
-            grid-template-columns: 200px 1fr 300px;
-            grid-template-rows: 1fr 250px;
-            height: calc(100vh - 65px);
+            grid-template-columns: 240px 1fr 320px;
+            grid-template-rows: 1fr 240px;
+            height: calc(100vh - 54px);
         }
 
-        /* Hierarchy (Sol Üst) */
-        .hierarchy { grid-area: 1 / 1 / 2 / 2; background: var(--u-panel); border-right: 1px solid var(--u-border); padding: 10px; }
-        
-        /* Scene View (Orta Üst) */
-        .scene-view { 
-            grid-area: 1 / 2 / 2 / 3; background: #333; position: relative;
-            background-image: radial-gradient(#444 1px, transparent 1px); background-size: 25px 25px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        .panel {
+            background: var(--u-panel);
+            border: 1px solid var(--u-border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        .scene-tab { position: absolute; top: 0; left: 0; background: #333; padding: 5px 15px; font-size: 11px; border-right: 1px solid #222; }
 
-        /* Project Window (Alt Paneller) */
-        .project-window { 
-            grid-area: 2 / 1 / 3 / 3; background: var(--u-panel); border-top: 2px solid var(--u-border); 
-            display: grid; grid-template-columns: 200px 1fr;
+        .panel-header {
+            background: #333;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--u-text-dim);
+            border-bottom: 1px solid var(--u-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .folder-tree { border-right: 1px solid var(--u-border); padding: 10px 0; }
-        .content-grid { 
-            padding: 15px; display: none; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; overflow-y: auto; 
+
+        #hierarchy-list {
+            padding: 10px;
+            font-size: 12px;
+            line-height: 1.8;
+            overflow-y: auto;
+            flex-grow: 1;
         }
-        .content-grid.active { display: grid; }
 
-        /* Inspector (Sağ Panel) */
-        .inspector { grid-area: 1 / 3 / 3 / 4; background: var(--u-panel); border-left: 2px solid var(--u-border); padding: 15px; }
-        .ins-title { font-weight: bold; border-bottom: 1px solid var(--u-border); padding-bottom: 5px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-
-        /* Asset Cards */
-        .asset-card { 
-            text-align: center; cursor: pointer; padding: 8px; border-radius: 4px; transition: 0.2s;
-            text-decoration: none; color: inherit;
+        .h-item {
+            margin-left: 15px;
+            color: #a2a2a2;
+            cursor: pointer;
         }
-        .asset-card:hover { background: #3e3e3e; }
-        .asset-icon { width: 64px; height: 64px; background: #383838; margin: 0 auto 5px; border: 1px solid #444; display: flex; align-items: center; justify-content: center; font-size: 30px; }
 
-        /* Typography & Components */
-        .comp-box { background: #333; padding: 10px; margin-bottom: 10px; border-radius: 3px; border-left: 3px solid var(--u-accent); }
-        .prop-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
-        .prop-label { color: #888; }
-        
-        .folder-item { padding: 4px 20px; cursor: pointer; opacity: 0.8; }
-        .folder-item:hover, .folder-item.active { background: #3e5f8a; opacity: 1; }
+        .h-item:hover {
+            background: #333;
+        }
 
-        footer { height: 35px; background: var(--u-panel); border-top: 1px solid var(--u-border); display: flex; align-items: center; padding: 0 15px; font-size: 11px; color: #aaa; position: fixed; bottom: 0; width: 100%; }
+        .scene-view {
+            grid-area: 1 / 2 / 2 / 3;
+            background: #222;
+            position: relative;
+            background-image: linear-gradient(to right, #2a2a2a 1px, transparent 1px), linear-gradient(to bottom, #2a2a2a 1px, transparent 1px);
+            background-size: 40px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scene-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #222;
+            padding: 4px 12px;
+            font-size: 11px;
+            border-right: 1px solid var(--u-border);
+            border-bottom: 1px solid var(--u-border);
+        }
+
+        .project-window {
+            grid-area: 2 / 1 / 3 / 3;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+        }
+
+        .folder-list {
+            background: #252525;
+            padding: 10px 0;
+            border-right: 1px solid var(--u-border);
+        }
+
+        .folder-item {
+            padding: 4px 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .folder-item.active {
+            background: var(--u-accent);
+            color: white;
+        }
+
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .breadcrumb {
+            background: #333;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 11px;
+            border-bottom: 1px solid var(--u-border);
+            color: #aaa;
+        }
+
+        .breadcrumb span {
+            cursor: pointer;
+        }
+
+        .breadcrumb span:hover {
+            color: white;
+        }
+
+        .btn-back {
+            margin-right: 10px;
+            cursor: pointer;
+            background: #444;
+            padding: 1px 6px;
+            border-radius: 2px;
+        }
+
+        .btn-back:hover {
+            background: var(--u-accent);
+            color: white;
+        }
+
+        .content-grid {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+            align-content: start;
+        }
+
+        /* Asset Cards & Images */
+        .asset-card {
+            width: 90px;
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            border-radius: 4px;
+            padding: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .asset-card:hover {
+            background: #444;
+        }
+
+        .asset-card.drag-over {
+            border: 2px dashed var(--u-accent);
+            background: #3a3a3a;
+        }
+
+        /* Görsellerin kutuya tam oturması için overflow:hidden ve cover kullanıldı */
+        .asset-icon {
+            width: 64px;
+            height: 64px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 6px;
+            pointer-events: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .asset-name {
+            font-size: 11px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .asset-name-input {
+            width: 100%;
+            font-size: 11px;
+            text-align: center;
+            background: #111;
+            color: white;
+            border: 1px solid var(--u-accent);
+            outline: none;
+        }
+
+        .tag {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            font-size: 8px;
+            background: #000;
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-family: 'Inter', sans-serif;
+            z-index: 5;
+        }
+
+        .inspector {
+            grid-area: 1 / 3 / 3 / 4;
+            border-left: 2px solid var(--u-border);
+        }
+
+        .ins-section {
+            padding: 12px;
+            border-bottom: 1px solid var(--u-border);
+        }
+
+        .ins-row {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            margin-bottom: 6px;
+            font-size: 11px;
+        }
+
+        .ins-label {
+            color: var(--u-text-dim);
+        }
+
+        .ins-val {
+            color: var(--u-accent);
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .comp-header {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        footer {
+            height: 22px;
+            background: var(--u-panel);
+            border-top: 1px solid var(--u-border);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 11px;
+            color: var(--u-text-dim);
+        }
+
+        .context-menu {
+            position: absolute;
+            background: #333;
+            border: 1px solid #111;
+            border-radius: 3px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            min-width: 150px;
+            z-index: 1000;
+            font-size: 12px;
+            padding: 4px 0;
+        }
+
+        .ctx-item {
+            padding: 6px 15px;
+            cursor: pointer;
+            color: #ddd;
+        }
+
+        .ctx-item:hover {
+            background: var(--u-accent);
+            color: white;
+        }
+
+        .ctx-divider {
+            height: 1px;
+            background: #444;
+            margin: 4px 0;
+        }
     </style>
 </head>
+
 <body>
 
-<nav>
-    <div style="font-weight: bold; color: #fff;">VOID NIGHT STUDIOS</div>
-    <div class="nav-item">File</div><div class="nav-item">Edit</div><div class="nav-item">Assets</div><div class="nav-item">Window</div>
-</nav>
+    <header>
+        <div style="font-weight: 700; margin-right: 20px;">Void Night Studios</div>
+        <span class="nav-link">File</span><span class="nav-link">Edit</span><span class="nav-link">Assets</span><span
+            class="nav-link">GameObject</span><span class="nav-link">Window</span>
+    </header>
 
-<div class="editor-grid">
-    <aside class="hierarchy">
-        <div style="font-size: 11px; color: #666; margin-bottom: 8px;">Hierarchy</div>
-        <div>▼ MainScene</div>
-        <div style="margin-left: 15px; color: var(--u-accent);">● Global_Light</div>
-        <div style="margin-left: 15px;">● Studio_Manager</div>
-        <div style="margin-left: 15px;">● UI_Canvas</div>
-    </aside>
-
-    <section class="scene-view">
-        <div class="scene-tab"># Scene</div>
-        <h1 style="margin:0; letter-spacing: 4px;">VOID NIGHT</h1>
-        <p style="font-family: 'JetBrains Mono'; color: #888;">Indie game studio from Turkey.</p>
-    </section>
-
-    <section class="project-window">
-        <div class="folder-tree">
-            <div style="font-size: 11px; color: #666; padding: 0 20px 5px;">Project</div>
-            <div class="folder-item active" onclick="tabs('games', this)">📂 Games</div>
-            <div class="folder-item" onclick="tabs('assets', this)">📂 Unity Assets</div>
-        </div>
-
-        <div id="games" class="content-grid active">
-            <a href="https://store.steampowered.com/app/3337050/The_Night_Games_Collection/" target="_blank" class="asset-card" 
-               onmouseover="inspect('The Night Games Coll.', 'Steam / Collection', 'Atmospheric horror mini-games.', '🌕')">
-                <div class="asset-icon">🌑</div><span>Night Games</span>
-            </a>
-            <a href="https://store.steampowered.com/app/4298170/Carry_the_Pack_Rack/" target="_blank" class="asset-card" 
-               onmouseover="inspect('Carry the Pack Rack', 'Steam / Indie', 'A unique management & carry experience.', '🎒')">
-                <div class="asset-icon">🎒</div><span>Pack Rack</span>
-            </a>
-            <a href="https://beratozturkoglu.itch.io/night-bici" target="_blank" class="asset-card" 
-               onmouseover="inspect('Night Bici', 'Itch.io / Casual', 'Traditional street food sim.', '🍧')">
-                <div class="asset-icon">🍧</div><span>Bici</span>
-            </a>
-            <a href="https://beratozturkoglu.itch.io/night-kebap" target="_blank" class="asset-card" 
-               onmouseover="inspect('Night Kebap', 'Itch.io / Simulation', 'The ultimate kebap master experience.', '🍢')">
-                <div class="asset-icon">🍢</div><span>Kebap</span>
-            </a>
-            <a href="https://beratozturkoglu.itch.io/night-reception" target="_blank" class="asset-card" 
-               onmouseover="inspect('Night Reception', 'Itch.io / Horror', 'Something is wrong at the desk...', '🛎️')">
-                <div class="asset-icon">🛎️</div><span>Reception</span>
-            </a>
-            <a href="https://beratozturkoglu.itch.io/night-doner" target="_blank" class="asset-card" 
-               onmouseover="inspect('Night Doner', 'Itch.io / Sim', 'Serving late night döner.', '🥙')">
-                <div class="asset-icon">🥙</div><span>Doner</span>
-            </a>
-        </div>
-
-        <div id="assets" class="content-grid">
-            <a href="https://assetstore.unity.com/packages/tools/physics/easy-peasy-first-person-controller-317073" target="_blank" class="asset-card" 
-               onmouseover="inspect('Easy FP Controller', 'Unity Tool', 'Ready-to-use physics based controller.', '🏃')">
-                <div class="asset-icon">🏃</div><span>FP Controller</span>
-            </a>
-            <a href="https://assetstore.unity.com/packages/templates/systems/easy-horror-template-306111" target="_blank" class="asset-card" 
-               onmouseover="inspect('Easy Horror Template', 'Unity Template', 'All-in-one horror game framework.', '👻')">
-                <div class="asset-icon">👻</div><span>Horror Temp.</span>
-            </a>
-            <a href="https://assetstore.unity.com/packages/tools/audio/easy-audio-cutter-316085" target="_blank" class="asset-card" 
-               onmouseover="inspect('Easy Audio Cutter', 'Unity Tool', 'Cut and edit audio inside Unity.', '✂️')">
-                <div class="asset-icon">✂️</div><span>Audio Cutter</span>
-            </a>
-            <a href="https://assetstore.unity.com/packages/tools/particles-effects/feedback-graph-352056" target="_blank" class="asset-card" 
-               onmouseover="inspect('Feedback Graph', 'Unity Tool', 'Visualize game feedback systems.', '📊')">
-                <div class="asset-icon">📊</div><span>Feedback</span>
-            </a>
-        </div>
-    </section>
-
-    <aside class="inspector" id="inspector-panel">
-        <div class="ins-title">ℹ️ Inspector</div>
-        <div id="ins-default">
-            <div class="comp-box">
-                <strong>Studio_Manager (Script)</strong><br>
-                <span style="font-size:11px; color:#888;">Select an item to view properties.</span>
+    <div class="editor-container">
+        <aside class="panel">
+            <div class="panel-header">Hierarchy <span style="cursor:pointer;"
+                    onclick="addHierarchyItem('Empty')">+</span></div>
+            <div id="hierarchy-list">
+                <div>▼ MainScene</div>
+                <div class="h-item">● Global_Volume</div>
+                <div class="h-item">● Studio_Manager</div>
+                <div class="h-item">● Main_Camera</div>
             </div>
-            <div class="prop-row"><span class="prop-label">Status</span><span>Active</span></div>
-            <div class="prop-row"><span class="prop-label">Origin</span><span>Turkey</span></div>
-        </div>
-        <div id="ins-content" style="display:none;">
-            <div id="ins-icon" style="font-size: 50px; text-align: center; margin-bottom: 10px;"></div>
-            <div class="comp-box">
-                <strong id="ins-name">Item Name</strong><br>
-                <span id="ins-type" style="font-size:11px; color:var(--u-accent);">Type</span>
+        </aside>
+
+        <main class="scene-view">
+            <div class="scene-label"># Scene</div>
+            <h1 style="font-weight: 500; letter-spacing: 6px; margin: 0; font-size: 2.5rem;">VOID NIGHT</h1>
+            <p style="color: var(--u-text-dim); font-size: 12px; font-family: 'JetBrains Mono'; margin-top: 10px;">Indie
+                game studio from Turkey.</p>
+        </main>
+
+        <section class="panel project-window">
+            <div class="folder-list">
+                <div class="folder-item active" id="tab-root_games" onclick="switchRootTab('root_games')">📂 Games</div>
+                <div class="folder-item" id="tab-root_assets" onclick="switchRootTab('root_assets')">📂 Unity Assets
+                </div>
             </div>
-            <div class="comp-box">
-                <strong>Description</strong><br>
-                <span id="ins-desc" style="font-size:11px; color:#aaa;">Description goes here...</span>
+
+            <div class="content-area" id="project-bg">
+                <div class="breadcrumb">
+                    <span class="btn-back" onclick="goBack()" id="btn-back" style="display:none;">◀</span>
+                    <span id="path-text">Assets > Games</span>
+                </div>
+                <div class="content-grid" id="content-grid">
+                </div>
             </div>
-            <button style="width:100%; padding:8px; background:#444; border:1px solid #555; color:white; cursor:pointer;" onclick="alert('Redirecting to Store...')">Open Store Page</button>
+        </section>
+
+        <aside class="panel inspector">
+            <div class="panel-header">Inspector</div>
+            <div id="ins-content">
+                <div class="ins-section">
+                    <div class="comp-header" style="color:#aaa;">Nothing Selected</div>
+                    <div style="font-size: 11px; color: #666;">Click on an item to inspect its properties.</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span id="console-dot" style="color: #4caf50;">●</span>
+            <span id="console-text">System compiled. Welcome to Void Night Studios Editor.</span>
         </div>
-    </aside>
-</div>
+    </footer>
 
-<footer>
-    <span>[Console] Build Successful: Void Night Studios initialized.</span>
-</footer>
+    <div id="ctx-general" class="context-menu">
+        <div class="ctx-item" onclick="createFolder()">Create > Folder</div>
+        <div class="ctx-item" onclick="createScript()">Create > C# Script</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item" onclick="logConsole('Project Reimported.')">Reimport All</div>
+    </div>
 
-<script>
-    function tabs(id, el) {
-        document.querySelectorAll('.content-grid').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.folder-item').forEach(f => f.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
-    }
+    <div id="ctx-item" class="context-menu">
+        <div class="ctx-item" onclick="openItem()">Open / Enter</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item" onclick="startRename()">Rename</div>
+        <div class="ctx-item" onclick="deleteItem()" style="color: #ff5555;">Delete</div>
+    </div>
 
-    function inspect(name, type, desc, icon) {
-        document.getElementById('ins-default').style.display = 'none';
-        document.getElementById('ins-content').style.display = 'block';
-        document.getElementById('ins-name').innerText = name;
-        document.getElementById('ins-type').innerText = type;
-        document.getElementById('ins-desc').innerText = desc;
-        document.getElementById('ins-icon').innerText = icon;
-    }
-</script>
+    <script>
+        // --- SANAL DOSYA SİSTEMİ (VIRTUAL FILE SYSTEM) ---
+        // Resim (image) property'leri "Logos" klasörüne göre ayarlandı.
+        // icon: yedek (fallback) amaçlı emojiyi tutar.
+        let fileSystem = [
+            { id: 'g1', parent: 'root_games', type: 'game', name: 'The Night Games Collection', image: 'Logos/thenightgamescollection.png', icon: '🌑', tag: 'S', color: '#66c0f4', url: 'https://store.steampowered.com/app/3337050/' },
+            { id: 'g2', parent: 'root_games', type: 'game', name: 'Carry The Pack Rack', image: 'Logos/carrythepackrack.png', icon: '🎒', tag: 'S', color: '#66c0f4', url: 'https://store.steampowered.com/app/4298170/' },
+            { id: 'g3', parent: 'root_games', type: 'game', name: 'Night Bici', image: 'Logos/nightbici.png', icon: '🍧', tag: 'I', color: '#ff2449', url: 'https://beratozturkoglu.itch.io/night-bici' },
+            { id: 'g4', parent: 'root_games', type: 'game', name: 'Night Kebap', image: 'Logos/nightkebap.png', icon: '🍢', tag: 'I', color: '#ff2449', url: 'https://beratozturkoglu.itch.io/night-kebap' },
+            { id: 'g5', parent: 'root_games', type: 'game', name: 'Night Reception', image: 'Logos/nightreception.png', icon: '🛎️', tag: 'I', color: '#ff2449', url: 'https://beratozturkoglu.itch.io/night-reception' },
+            { id: 'g6', parent: 'root_games', type: 'game', name: 'Night Doner', image: 'Logos/nightdoner.png', icon: '🥙', tag: 'I', color: '#ff2449', url: 'https://beratozturkoglu.itch.io/night-doner' },
+
+            { id: 'a1', parent: 'root_assets', type: 'asset', name: 'Easy Peasy First Person Controller', image: 'Logos/easypeasyfirstpersoncontroller.png', icon: '🏃', tag: 'U', color: '#fff', url: 'https://assetstore.unity.com/packages/tools/physics/easy-peasy-first-person-controller-317073' },
+            { id: 'a2', parent: 'root_assets', type: 'asset', name: 'Easy Horror Template', image: 'Logos/easyhorrortemplate.png', icon: '👻', tag: 'U', color: '#fff', url: 'https://assetstore.unity.com/packages/package/306111' },
+            { id: 'a3', parent: 'root_assets', type: 'asset', name: 'Easy Audio Cutter', image: 'Logos/easyaudiocutter.png', icon: '✂️', tag: 'U', color: '#fff', url: 'https://assetstore.unity.com/packages/package/316085' },
+            { id: 'a4', parent: 'root_assets', type: 'asset', name: 'Feedback Graph', image: 'Logos/feedbackgraph.png', icon: '📊', tag: 'U', color: '#fff', url: 'https://assetstore.unity.com/packages/package/352056' }
+        ];
+
+        let currentPath = [{ id: 'root_games', name: 'Games' }];
+        let draggedItemId = null;
+        let selectedItemId = null;
+
+        function renderProjectView() {
+            const grid = document.getElementById('content-grid');
+            grid.innerHTML = '';
+
+            const currentFolderId = currentPath[currentPath.length - 1].id;
+            const itemsToDisplay = fileSystem.filter(item => item.parent === currentFolderId);
+
+            itemsToDisplay.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'asset-card';
+                el.draggable = true;
+                el.dataset.id = item.id;
+
+                let tagHTML = item.tag ? `<span class="tag" style="color:${item.color}">${item.tag}</span>` : '';
+
+                // Görsel varsa kullan, görsel yüklenemezse (onerror) otomatik olarak emojiyi (<span style="font-size:28px;">📦</span>) göster
+                let iconContent = item.image
+                    ? `<img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.outerHTML='<span style=\\'font-size:28px;\\'>${item.icon || '📦'}</span>'"/>`
+                    : `<span style="font-size:28px;">${item.icon || '📦'}</span>`;
+
+                el.innerHTML = `
+                <div class="asset-icon">${iconContent}${tagHTML}</div>
+                <div class="asset-name">${item.name}</div>
+            `;
+
+                el.onclick = (e) => selectItem(item, e);
+                el.ondblclick = () => {
+                    if (item.type === 'folder') enterFolder(item);
+                    else if (item.url) window.open(item.url, '_blank');
+                };
+                el.oncontextmenu = (e) => showContextMenu(e, 'item', item.id);
+
+                el.ondragstart = (e) => { draggedItemId = item.id; logConsole('Dragging: ' + item.name, true); };
+
+                if (item.type === 'folder') {
+                    el.ondragover = (e) => { e.preventDefault(); el.classList.add('drag-over'); };
+                    el.ondragleave = (e) => { el.classList.remove('drag-over'); };
+                    el.ondrop = (e) => {
+                        e.preventDefault();
+                        el.classList.remove('drag-over');
+                        if (draggedItemId && draggedItemId !== item.id) {
+                            moveItem(draggedItemId, item.id);
+                        }
+                    };
+                }
+
+                grid.appendChild(el);
+            });
+
+            updateBreadcrumb();
+        }
+
+        function updateBreadcrumb() {
+            const pathText = document.getElementById('path-text');
+            const btnBack = document.getElementById('btn-back');
+            pathText.innerText = 'Assets > ' + currentPath.map(p => p.name).join(' > ');
+            btnBack.style.display = currentPath.length > 1 ? 'inline' : 'none';
+        }
+
+        function switchRootTab(rootId) {
+            document.querySelectorAll('.folder-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + rootId).classList.add('active');
+            currentPath = [{ id: rootId, name: rootId === 'root_games' ? 'Games' : 'Unity Assets' }];
+            renderProjectView();
+            logConsole('Switched to ' + currentPath[0].name);
+        }
+
+        function enterFolder(folder) { currentPath.push({ id: folder.id, name: folder.name }); renderProjectView(); logConsole('Entered ' + folder.name); }
+        function goBack() { if (currentPath.length > 1) { currentPath.pop(); renderProjectView(); logConsole('Navigated Back'); } }
+        function moveItem(itemId, targetFolderId) { const item = fileSystem.find(i => i.id === itemId); if (item) { item.parent = targetFolderId; logConsole(`Moved ${item.name} into folder.`); renderProjectView(); } }
+
+        function generateId() { return Math.random().toString(36).substr(2, 9); }
+        function createFolder() { fileSystem.push({ id: generateId(), parent: currentPath[currentPath.length - 1].id, type: 'folder', name: 'New Folder', icon: '📁' }); renderProjectView(); logConsole('Created New Folder.'); }
+        function createScript() { fileSystem.push({ id: generateId(), parent: currentPath[currentPath.length - 1].id, type: 'script', name: 'NewScript', icon: '<span style="color:#4c7ebc; font-size:16px;">C#</span>' }); renderProjectView(); logConsole('Created C# Script.'); }
+
+        function deleteItem() {
+            if (!selectedItemId) return;
+            const item = fileSystem.find(i => i.id === selectedItemId);
+            fileSystem = fileSystem.filter(i => i.id !== selectedItemId && i.parent !== selectedItemId);
+            logConsole(`Deleted ${item.name}`, true);
+            renderProjectView();
+            document.getElementById('ins-content').innerHTML = '<div class="ins-section"><div class="comp-header" style="color:#aaa;">Nothing Selected</div></div>';
+        }
+
+        function startRename() {
+            if (!selectedItemId) return;
+            const el = document.querySelector(`[data-id='${selectedItemId}']`);
+            const nameDiv = el.querySelector('.asset-name');
+            const currentName = nameDiv.innerText;
+            nameDiv.innerHTML = `<input type="text" class="asset-name-input" value="${currentName}" id="rename-input" />`;
+            const input = document.getElementById('rename-input');
+            input.focus(); input.select();
+            input.onblur = () => finishRename(input.value);
+            input.onkeydown = (e) => { if (e.key === 'Enter') finishRename(input.value); };
+        }
+
+        function finishRename(newName) { if (newName.trim() !== "") { fileSystem.find(i => i.id === selectedItemId).name = newName; logConsole(`Renamed to ${newName}`); } renderProjectView(); }
+
+        function selectItem(item, event) {
+            selectedItemId = item.id;
+            document.querySelectorAll('.asset-card').forEach(c => c.style.background = 'transparent');
+            event.currentTarget.style.background = '#444';
+
+            // Inspector panelinde de büyük resmi (veya yedeği) göster
+            let insIconContent = item.image
+                ? `<img src="${item.image}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 6px;" onerror="this.outerHTML='<div style=\\'font-size: 50px;\\'>${item.icon || '📦'}</div>'"/>`
+                : `<div style="font-size: 50px;">${item.icon || '📦'}</div>`;
+
+            const ins = document.getElementById('ins-content');
+            ins.innerHTML = `
+            <div class="ins-section">
+                <div style="text-align: center; margin-bottom: 10px;">${insIconContent}</div>
+                <div class="comp-header">📦 ${item.name}</div>
+                <div class="ins-row"><span class="ins-label">Type</span><span class="ins-val">${item.type.toUpperCase()}</span></div>
+                <div class="ins-row"><span class="ins-label">ID</span><span class="ins-val">${item.id}</span></div>
+            </div>
+        `;
+        }
+
+        function logConsole(msg, isWarning = false) {
+            document.getElementById('console-text').innerText = msg;
+            document.getElementById('console-dot').style.color = isWarning ? "#ffeb3b" : "#4caf50";
+        }
+
+        function addHierarchyItem(name) {
+            const list = document.getElementById('hierarchy-list');
+            const newItem = document.createElement('div');
+            newItem.className = 'h-item';
+            newItem.innerText = '● New ' + name;
+            list.appendChild(newItem);
+            logConsole(`Created GameObject: ${name}`);
+        }
+
+        const ctxGen = document.getElementById('ctx-general');
+        const ctxItem = document.getElementById('ctx-item');
+
+        function showContextMenu(e, type, itemId = null) {
+            e.preventDefault(); e.stopPropagation(); hideContextMenus();
+            let menu = type === 'general' ? ctxGen : ctxItem;
+            if (itemId) selectItem(fileSystem.find(i => i.id === itemId), e);
+            menu.style.display = 'flex'; menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px';
+        }
+
+        function hideContextMenus() { ctxGen.style.display = 'none'; ctxItem.style.display = 'none'; }
+        document.getElementById('project-bg').addEventListener('contextmenu', (e) => {
+            if (e.target.closest('.asset-card')) return; showContextMenu(e, 'general');
+        });
+        window.addEventListener('click', hideContextMenus);
+
+        function openItem() {
+            const item = fileSystem.find(i => i.id === selectedItemId);
+            if (item.type === 'folder') enterFolder(item);
+            else if (item.url) window.open(item.url, '_blank');
+        }
+
+        renderProjectView();
+    </script>
 
 </body>
+
 </html>
